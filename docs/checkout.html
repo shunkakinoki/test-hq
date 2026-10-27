@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Checkout - test-hq</title>
+</head>
+<body>
+  <h1>Checkout</h1>
+  <table id="cart">
+    <tr><td>Team plan (5 seats)</td><td>$100.00</td></tr>
+  </table>
+  <form id="checkout">
+    <label>Discount code <input name="code"></label>
+    <button type="submit">Pay</button>
+  </form>
+  <p id="total"></p>
+  <script type="module">
+    import { cartTotal } from "./lib/cart.js";
+    import { formatCents } from "./lib/format.js";
+    const items = [{ name: "Team plan", cents: 10000, quantity: 1 }];
+    document.getElementById("checkout").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const code = new FormData(event.target).get("code");
+      document.getElementById("total").textContent = `Total: ${formatCents(cartTotal(items, code))}`;
+    });
+  </script>
+</body>
+</html>

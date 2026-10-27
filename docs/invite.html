@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Invite a teammate - test-hq</title>
+</head>
+<body>
+  <h1>Invite a teammate</h1>
+  <form id="invite">
+    <label>Teammate email <input type="email" name="email" required></label>
+    <button type="submit">Send invite</button>
+  </form>
+  <p id="result"></p>
+  <script type="module">
+    import { validateInvite } from "./lib/invite.js";
+    document.getElementById("invite").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const email = new FormData(event.target).get("email");
+      const problem = validateInvite(email, ["owner@test-hq.example"]);
+      document.getElementById("result").textContent = problem ?? `Invite sent to ${email}`;
+    });
+  </script>
+</body>
+</html>
