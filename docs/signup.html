@@ -11,6 +11,22 @@
     <label>Password <input type="password" name="password" minlength="8" required></label>
     <button type="submit">Sign up</button>
   </form>
-  <p>After signing up, <a id="continue" href="welcom.html">continue to your workspace</a>.</p>
+  <p id="result" role="status"></p>
+  <p>After signing up, <a id="continue" href="welcome.html">continue to your workspace</a>.</p>
+  <script type="module">
+    import { signupStep } from "./lib/signup.js";
+    document.getElementById("signup").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const data = new FormData(event.target);
+      const step = signupStep({
+        email: data.get("email"),
+        password: data.get("password"),
+      });
+      const box = document.getElementById("result");
+      box.textContent = step.message;
+      box.dataset.state = step.ok ? "created" : "failed";
+      if (step.ok && step.next) location.assign(step.next);
+    });
+  </script>
 </body>
 </html>
