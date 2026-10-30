@@ -7,22 +7,37 @@
 <body>
   <h1>Checkout</h1>
   <table id="cart">
-    <tr><td>Team plan (5 seats)</td><td>$100.00</td></tr>
+    <tbody id="cart-lines"></tbody>
   </table>
   <form id="checkout">
     <label>Discount code <input name="code"></label>
     <button type="submit">Pay</button>
   </form>
-  <p id="total"></p>
+  <p id="total" role="status"></p>
   <script type="module">
     import { cartTotal } from "./lib/cart.js";
     import { formatCents } from "./lib/format.js";
-    const items = [{ name: "Team plan", cents: 10000, quantity: 1 }];
-    document.getElementById("checkout").addEventListener("submit", (event) => {
+    const items = [{ name: "Team plan (5 seats)", cents: 10000, quantity: 1 }];
+    const lines = document.getElementById("cart-lines");
+    for (const item of items) {
+      const row = document.createElement("tr");
+      const name = document.createElement("td");
+      const price = document.createElement("td");
+      name.textContent = item.name;
+      price.textContent = formatCents(item.cents * item.quantity);
+      row.append(name, price);
+      lines.append(row);
+    }
+    const total = document.getElementById("total");
+    const render = (code) => {
+      total.textContent = `Total: ${formatCents(cartTotal(items, code))}`;
+    };
+    const form = document.getElementById("checkout");
+    form.addEventListener("submit", (event) => {
       event.preventDefault();
-      const code = new FormData(event.target).get("code");
-      document.getElementById("total").textContent = `Total: ${formatCents(cartTotal(items, code))}`;
+      render(new FormData(form).get("code"));
     });
+    render("");
   </script>
 </body>
 </html>
