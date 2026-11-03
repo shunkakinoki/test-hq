@@ -7,17 +7,28 @@
 <body>
   <h1>Invite a teammate</h1>
   <form id="invite">
-    <label>Teammate email <input type="email" name="email" required></label>
+    <label>Teammate email <input type="email" name="email" autocomplete="off" required></label>
     <button type="submit">Send invite</button>
   </form>
-  <p id="result"></p>
+  <p id="result" role="status"></p>
   <script type="module">
-    import { validateInvite } from "./lib/invite.js";
-    document.getElementById("invite").addEventListener("submit", (event) => {
+    import { submitInvite } from "./lib/invite.js";
+
+    // No invite endpoint is published for this static site, so there is no
+    // transport. The page must say the invite was not sent rather than claim
+    // success from validation alone.
+    const send = undefined;
+    const members = ["owner@test-hq.example"];
+
+    const form = document.getElementById("invite");
+    const result = document.getElementById("result");
+
+    form.addEventListener("submit", async (event) => {
       event.preventDefault();
-      const email = new FormData(event.target).get("email");
-      const problem = validateInvite(email, ["owner@test-hq.example"]);
-      document.getElementById("result").textContent = problem ?? `Invite sent to ${email}`;
+      const email = new FormData(form).get("email");
+      const outcome = await submitInvite(email, members, send);
+      result.textContent = outcome.message;
+      result.dataset.sent = String(outcome.sent);
     });
   </script>
 </body>
