@@ -7,17 +7,39 @@
 <body>
   <h1>Invite a teammate</h1>
   <form id="invite">
-    <label>Teammate email <input type="email" name="email" required></label>
+    <label>Teammate email <input type="email" name="email" autocomplete="email" required></label>
     <button type="submit">Send invite</button>
   </form>
-  <p id="result"></p>
+  <p id="result" role="status"></p>
   <script type="module">
     import { validateInvite } from "./lib/invite.js";
-    document.getElementById("invite").addEventListener("submit", (event) => {
+    import { sendInvite } from "./lib/invite-api.js";
+
+    const MEMBERS = ["owner@test-hq.example"];
+    const form = document.getElementById("invite");
+    const result = document.getElementById("result");
+    const button = form.querySelector("button");
+
+    form.addEventListener("submit", async (event) => {
       event.preventDefault();
-      const email = new FormData(event.target).get("email");
-      const problem = validateInvite(email, ["owner@test-hq.example"]);
-      document.getElementById("result").textContent = problem ?? `Invite sent to ${email}`;
+      const email = new FormData(form).get("email");
+      const problem = validateInvite(email, MEMBERS);
+      if (problem) {
+        result.textContent = problem;
+        return;
+      }
+      button.disabled = true;
+      result.textContent = `Sending invite to ${email}...`;
+      try {
+        await sendInvite(email);
+        result.textContent = `Invite sent to ${email}`;
+        form.reset();
+      } catch (error) {
+        // Report the failure instead of claiming an invite that never left.
+        result.textContent = `Invite not sent: ${error.message}. Please try again.`;
+      } finally {
+        button.disabled = false;
+      }
     });
   </script>
 </body>
