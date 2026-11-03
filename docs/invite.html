@@ -10,14 +10,17 @@
     <label>Teammate email <input type="email" name="email" required></label>
     <button type="submit">Send invite</button>
   </form>
-  <p id="result"></p>
+  <p id="result" role="status"></p>
   <script type="module">
-    import { validateInvite } from "./lib/invite.js";
-    document.getElementById("invite").addEventListener("submit", (event) => {
+    import { sendInvite } from "./lib/invite.js";
+    document.getElementById("invite").addEventListener("submit", async (event) => {
       event.preventDefault();
       const email = new FormData(event.target).get("email");
-      const problem = validateInvite(email, ["owner@test-hq.example"]);
-      document.getElementById("result").textContent = problem ?? `Invite sent to ${email}`;
+      const box = document.getElementById("result");
+      box.textContent = "Sending invite…";
+      const { ok, message } = await sendInvite(email, ["owner@test-hq.example"]);
+      box.textContent = message;
+      box.dataset.state = ok ? "sent" : "failed";
     });
   </script>
 </body>
