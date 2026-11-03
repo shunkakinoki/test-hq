@@ -6,11 +6,31 @@
 </head>
 <body>
   <h1>Create your account</h1>
-  <form id="signup">
-    <label>Email <input type="email" name="email" required></label>
-    <label>Password <input type="password" name="password" minlength="8" required></label>
+  <form id="signup" data-next="welcome.html">
+    <label>Email <input type="email" name="email" autocomplete="email" required></label>
+    <label>Password <input type="password" name="password" autocomplete="new-password" minlength="8" required></label>
     <button type="submit">Sign up</button>
   </form>
-  <p>After signing up, <a id="continue" href="welcom.html">continue to your workspace</a>.</p>
+  <p id="message" role="alert"></p>
+  <p>After signing up, <a id="continue" href="welcome.html">continue to your workspace</a>.</p>
+  <script type="module">
+    import { validateSignup, signupDestination } from "./lib/signup.js";
+    const form = document.getElementById("signup");
+    const message = document.getElementById("message");
+    form.addEventListener("submit", (event) => {
+      // Never let the browser submit this form natively: with no action the
+      // default is a GET back to this page, which writes the password into the
+      // URL, browser history and server logs, and signs nobody up.
+      event.preventDefault();
+      const data = new FormData(form);
+      const problem = validateSignup(data.get("email"), data.get("password"));
+      if (problem) {
+        message.textContent = problem;
+        return;
+      }
+      message.textContent = "";
+      location.assign(signupDestination(form));
+    });
+  </script>
 </body>
 </html>
