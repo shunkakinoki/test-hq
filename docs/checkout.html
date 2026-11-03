@@ -7,7 +7,10 @@
 <body>
   <h1>Checkout</h1>
   <table id="cart">
-    <tr><td>Team plan (5 seats)</td><td>$100.00</td></tr>
+    <thead>
+      <tr><th scope="col">Item</th><th scope="col">Qty</th><th scope="col">Total</th></tr>
+    </thead>
+    <tbody id="cart-lines"></tbody>
   </table>
   <form id="checkout">
     <label>Discount code <input name="code"></label>
@@ -15,14 +18,41 @@
   </form>
   <p id="total"></p>
   <script type="module">
-    import { cartTotal } from "./lib/cart.js";
+    import { cartLines, cartTotal } from "./lib/cart.js";
     import { formatCents } from "./lib/format.js";
-    const items = [{ name: "Team plan", cents: 10000, quantity: 1 }];
-    document.getElementById("checkout").addEventListener("submit", (event) => {
+
+    const items = [{ name: "Team plan", seats: 5, cents: 10000, quantity: 1 }];
+    const lines = document.getElementById("cart-lines");
+    const total = document.getElementById("total");
+    const form = document.getElementById("checkout");
+
+    const renderLines = () => {
+      lines.replaceChildren(
+        ...cartLines(items, formatCents).map((line) => {
+          const row = document.createElement("tr");
+          for (const cell of [line.label, line.quantity, line.total]) {
+            const td = document.createElement("td");
+            td.textContent = String(cell);
+            row.append(td);
+          }
+          return row;
+        }),
+      );
+    };
+
+    const renderTotal = (code) => {
+      total.textContent = `Total: ${formatCents(cartTotal(items, code))}`;
+    };
+
+    form.addEventListener("submit", (event) => {
       event.preventDefault();
-      const code = new FormData(event.target).get("code");
-      document.getElementById("total").textContent = `Total: ${formatCents(cartTotal(items, code))}`;
+      renderTotal(new FormData(form).get("code"));
     });
+
+    // A shopper must see what they owe before they press Pay, and the rows they
+    // read must come from the same items the total is computed from.
+    renderLines();
+    renderTotal("");
   </script>
 </body>
 </html>
