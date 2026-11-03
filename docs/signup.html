@@ -7,10 +7,29 @@
 <body>
   <h1>Create your account</h1>
   <form id="signup">
-    <label>Email <input type="email" name="email" required></label>
-    <label>Password <input type="password" name="password" minlength="8" required></label>
+    <label>Email <input type="email" name="email" autocomplete="email" required></label>
+    <label>Password <input type="password" name="password" autocomplete="new-password" minlength="8" required></label>
     <button type="submit">Sign up</button>
   </form>
-  <p>After signing up, <a id="continue" href="welcom.html">continue to your workspace</a>.</p>
+  <p id="error" role="alert"></p>
+  <p>After signing up, <a id="continue" href="welcome.html">continue to your workspace</a>.</p>
+  <script type="module">
+    import { signupNextStep } from "./lib/signup.js";
+
+    const form = document.getElementById("signup");
+    const error = document.getElementById("error");
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const data = new FormData(form);
+      const result = signupNextStep(data.get("email"), data.get("password"));
+      if (!result.ok) {
+        error.textContent = result.error;
+        return;
+      }
+      error.textContent = "";
+      window.location.assign(result.next);
+    });
+  </script>
 </body>
 </html>
